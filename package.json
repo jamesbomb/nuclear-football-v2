@@ -1,0 +1,44 @@
+{
+  "name": "nuclear-football-v2",
+  "productName": "nuclear-football-v2",
+  "version": "1.0.0",
+  "description": "My Electron application description",
+  "main": ".vite/build/main.js",
+  "scripts": {
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make",
+    "publish": "electron-forge publish",
+    "lint": "echo \"No linting configured\"",
+    "convert": "node src/utils/convert-geojson-to-topojson.js"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "^7.4.0",
+    "@electron-forge/maker-deb": "^7.4.0",
+    "@electron-forge/maker-rpm": "^7.4.0",
+    "@electron-forge/maker-squirrel": "^7.4.0",
+    "@electron-forge/maker-zip": "^7.4.0",
+    "@electron-forge/plugin-auto-unpack-natives": "^7.4.0",
+    "@electron-forge/plugin-fuses": "^7.4.0",
+    "@electron-forge/plugin-vite": "^7.4.0",
+    "@electron/fuses": "^1.8.0",
+    "electron": "31.0.1",
+    "vite": "^5.3.1"
+  },
+  "keywords": [],
+  "author": {
+    "name": "jacopo.bombardieri",
+    "email": "jacopo.bombardieri@xnoova.com"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@vitejs/plugin-vue": "^5.0.5",
+    "d3": "^7.9.0",
+    "electron-squirrel-startup": "^1.0.1",
+    "topojson": "^3.0.2",
+    "topojson-client": "^3.1.0",
+    "topojson-server": "^3.0.1",
+    "utm": "^1.1.1",
+    "vue": "^3.4.29"
+  }
+}
