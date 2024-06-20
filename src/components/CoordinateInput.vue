@@ -87,14 +87,15 @@ export default {
   mounted() {
     this.$refs.zoneNumberInput.focus();
     window.addEventListener("keyup", (event) => {
-      if(event.key === "Enter" && this.northing.length === 7) {
+      if (event.key === "Enter" && this.northing.length === 7) {
         this.handleEnter();
       }
-    })
+    });
+    this.resetInputFields();
   },
   beforeDestroy() {
     window.removeEventListener("keyup", (event) => {
-      if(event.key === "Enter" && this.northing.length === 7) {
+      if (event.key === "Enter" && this.northing.length === 7) {
         this.handleEnter();
       }
     });
@@ -148,7 +149,12 @@ export default {
           this.zoneLetter.toUpperCase()
         );
         console.log({ latitude, longitude });
-        this.$emit('pushMarker', { latitude, longitude, color: "green", symbol: "polygon" })
+        this.$emit("pushMarker", {
+          latitude,
+          longitude,
+          color: "green",
+          symbol: "polygon",
+        });
         this.resetInputFields();
       } catch (error) {
         console.error(error);
@@ -158,7 +164,9 @@ export default {
       }
     },
     handleBackspace(event, field) {
+      console.log(event, field);
       if (event.key === "Backspace" && this[field].length === 0) {
+        console.log("backspace");
         switch (field) {
           case "zoneLetter":
             this.$refs.zoneNumberInput.focus();

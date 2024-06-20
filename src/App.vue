@@ -1,72 +1,3 @@
-<!-- <template>
-  <div id="map-container">
-    <div id="map"></div>
-    <div id="text-box">
-      <h2>{{ title }}</h2>
-      <div class="flex-container">
-        <label class="grid-label">
-          <span>Zona:</span>
-          <input
-            class="zone-number"
-            v-model="zoneNumber"
-            @input="validateZoneNumber"
-            @keydown="handleBackspace($event, 'zoneNumber')"
-            ref="zoneNumberInput"
-            type="text"
-            maxlength="2"
-            placeholder="00"
-            required
-          />
-        </label>
-        <label class="grid-label">
-          <span>Lettera:</span>
-          <input
-            class="zone-letter"
-            v-model="zoneLetter"
-            @input="validateZoneLetter"
-            @keydown="handleBackspace($event, 'zoneLetter')"
-            ref="zoneLetterInput"
-            type="text"
-            maxlength="1"
-            placeholder="T"
-            required
-          />
-        </label>
-        <label class="grid-label">
-          <span>Easting:</span>
-          <input
-            class="easting"
-            v-model="easting"
-            @input="validateEasting"
-            @keydown="handleBackspace($event, 'easting')"
-            ref="eastingInput"
-            type="text"
-            maxlength="6"
-            placeholder="000000"
-            required
-          />
-        </label>
-        <label class="grid-label">
-          <span>Northing:</span>
-          <input
-            class="northing"
-            v-model="northing"
-            @input="validateNorthing"
-            @keydown="handleBackspace($event, 'northing')"
-            @keyup.enter="handleEnter"
-            ref="northingInput"
-            type="text"
-            maxlength="7"
-            placeholder="0000000"
-            required
-          />
-        </label>
-      </div>
-      <p>Premi invio per confermare</p>
-    </div>
-  </div>
-</template> -->
-
 <template>
   <div id="map-container">
     <div id="map"></div>
@@ -80,8 +11,8 @@
         @submit="handleStartCoordinate"
         @pushMarker="pushMarker($event)"
         @changeState="changeState"
-        />
-        <!-- @resetInputFields="resetInputFields" -->
+      />
+      <!-- @resetInputFields="resetInputFields" -->
     </div>
     <div
       v-if="state === STATES.TARGET_COORDINATES"
@@ -90,7 +21,10 @@
       <h2>{{ title }}</h2>
       <CoordinateInput
         :title="title"
+        ciaos
         @submit="handleTargetCoordinate"
+        @pushMarker="pushMarker($event)"
+        @changeState="changeState"
       />
     </div>
     <div
@@ -120,7 +54,7 @@ import ETADisplay from "./components/ETADisplay.vue";
 import TerminateNavigationModal from "./components/TerminateNavigationModal.vue";
 
 const STATES = {
-  START_COORDINATE: "START_COORDINATE",
+  // START_COORDINATE: "START_COORDINATE",
   TARGET_COORDINATES: "TARGET_COORDINATES",
   PASSWORD: "PASSWORD",
   ETA_DISPLAY: "ETA_DISPLAY",
@@ -146,20 +80,21 @@ export default {
       svg: null,
       markers: [
         { name: "London", latitude: 51.5074, longitude: -0.1276 },
-        { name: "Washington DC", latitude: 38.9072, longitude: -77.0369 },
-        { name: "Rome", latitude: 41.9028, longitude: 12.4964 },
+        // { name: "Washington DC", latitude: 38.9072, longitude: -77.0369 },
+        // { name: "Rome", latitude: 41.9028, longitude: 12.4964 },
       ],
       zoneNumber: "",
       zoneLetter: "",
       easting: "",
       northing: "",
       currentInput: "",
-      title: "INSERIRE COORDINATE DI SITO DI LANCIO",
+      title: "Inserire coordinate bersaglio",
       insertingTarget: false,
       nthRocket: 1,
+      startCoordinate: { latitude: 51.5074, longitude: -0.1276 },
       startCoordinate: null,
       etas: [],
-      state: STATES.START_COORDINATE,
+      state: STATES.TARGET_COORDINATES,
       isShowModal: false,
     };
   },
@@ -167,9 +102,7 @@ export default {
     this.drawMap();
     window.addEventListener("resize", this.resizeMap);
     window.addEventListener("keydown", this.handleKeydown);
-    if (this.markers.length > 0) {
-      this.drawMarkers();
-    }
+    this.drawMarkers();
   },
   beforeDestroy() {
     window.removeEventListener("resize", this.resizeMap);
@@ -227,49 +160,54 @@ export default {
     drawMarkers() {
       if (!this.svg) return;
 
-      this.markers.forEach((marker) => {
-        const [cx, cy] = this.projection([
-          marker.longitude,
-          marker.latitude,
-          marker.color,
-          marker.symbol,
-        ]);
-        if (this.markers.symbol) {
-          this.svg
-            .appen("polygon")
-            .attr("points", "-37.43,32.41 0,-32.41 37.43,32.41")
-            .attr("fill", marker.color ?? "red")
-            .attr("stroke", "black")
-            .attr("stroke-width", 1);
-        } else
+      this.svg.selectAll(".marker").remove();
+
+      this.markers.forEach((marker, index) => {
+        const [cx, cy] = this.projection([marker.longitude, marker.latitude]);
+        if (index === 0) {
+          // Primo marker: verde e cerchio
           this.svg
             .append("circle")
+            .attr("class", "marker")
             .attr("cx", cx)
             .attr("cy", cy)
-            .attr("r", 5)
-            .attr("fill", marker.color ?? "red")
+            .attr("r", 10)
+            .attr("fill", "green")
             .attr("stroke", "black")
             .attr("stroke-width", 1);
+        } else {
+          // Marker successivi: rossi
+          this.svg
+            // .append("polygon")
+            .append("circle")
+            .attr("class", "marker")
+            // .attr("points", "-5,10 0,-10 5,10")
+            // .attr("transform", `translate(${cx},${cy})`)
+            .attr("r", 10)
+            .attr("fill", "red")
+            .attr("stroke", "black")
+            .attr("stroke-width", 1);
+        }
       });
     },
-    handleStartCoordinate(coordinate) {
-      const { latitude, longitude } = toLatLon(
-        coordinate.easting,
-        coordinate.northing,
-        coordinate.zoneNumber,
-        coordinate.zoneLetter
-      );
-      this.startCoordinate = { latitude, longitude };
-      this.markers.push({
-        latitude,
-        longitude,
-        color: "green",
-        symbol: "circle",
-      });
-      this.drawMarkers();
-      this.state = STATES.TARGET_COORDINATES;
-      this.title = "Inserire coordinate bersaglio";
-    },
+    // handleStartCoordinate(coordinate) {
+    //   const { latitude, longitude } = toLatLon(
+    //     coordinate.easting,
+    //     coordinate.northing,
+    //     coordinate.zoneNumber,
+    //     coordinate.zoneLetter
+    //   );
+    //   this.startCoordinate = { latitude, longitude };
+    //   this.markers.push({
+    //     latitude,
+    //     longitude,
+    //     color: "green",
+    //     symbol: "circle",
+    //   });
+    //   this.drawMarkers();
+    //   this.state = STATES.TARGET_COORDINATES;
+    //   this.title = "Inserire coordinate bersaglio";
+    // },
     handleTargetCoordinate(coordinate) {
       const { latitude, longitude } = toLatLon(
         coordinate.easting,
@@ -289,14 +227,9 @@ export default {
       }
     },
     handleKeydown(event) {
-      // console.log("current state: ", this.state, event);
       if (event.ctrlKey && event.key === "s") {
-        // console.log(event);
-        // this.title = "Inserimento terminato";
-        // this.insertingTarget = true;
         this.state = STATES.PASSWORD;
       } else if (event.ctrlKey && event.key === "a") {
-        //show modal
         this.isShowModal = true;
         this.state = STATES.TERMINATE_NAVIGATION;
       }
@@ -305,9 +238,8 @@ export default {
       this.isShowModal = false;
     },
     changeState(newState) {
-      switch (newState) {
-        case "TERMINATE_NAVIGATION":
-          this.state = STATES.TERMINATE_NAVIGATION;
+      if (newState === "TERMINATE_NAVIGATION") {
+        this.state = STATES.TERMINATE_NAVIGATION;
       }
     },
     calculateEtas() {
