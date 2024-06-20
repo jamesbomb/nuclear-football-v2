@@ -70,22 +70,40 @@
 <template>
   <div id="map-container">
     <div id="map"></div>
-    <div v-if="state === STATES.START_COORDINATE" id="text-box">
+    <div
+      v-if="state === STATES.START_COORDINATE"
+      id="text-box"
+    >
       <h2>{{ title }}</h2>
-      <CoordinateInput :title="title" @submit="handleStartCoordinate" />
+      <CoordinateInput
+        :title="title"
+        @submit="handleStartCoordinate"
+        @pushMarker="pushMarker($event)"
+        @changeState="changeState"
+        />
+        <!-- @resetInputFields="resetInputFields" -->
     </div>
-    <div v-if="state === STATES.TARGET_COORDINATES" id="text-box">
+    <div
+      v-if="state === STATES.TARGET_COORDINATES"
+      id="text-box"
+    >
       <h2>{{ title }}</h2>
-      <CoordinateInput :title="title" @submit="handleTargetCoordinate" />
+      <CoordinateInput
+        :title="title"
+        @submit="handleTargetCoordinate"
+      />
     </div>
-    <div v-if="state === STATES.PASSWORD" id="text-box">
+    <div
+      v-if="state === STATES.PASSWORD"
+      id="text-box"
+    >
       <PasswordPrompt @submit="handlePasswordSubmit" />
     </div>
     <div v-if="state === STATES.ETA_DISPLAY">
       <ETADisplay :etas="etas" />
     </div>
-    <div v-if="state === STATES.TERMINATE_NAVIGATION">
-      <TerminateNavigationModal />
+    <div v-if="isShowModal">
+      <TerminateNavigationModal @closeModal="closeModal" />
     </div>
   </div>
 </template>
@@ -127,9 +145,9 @@ export default {
       path: null,
       svg: null,
       markers: [
-        // { name: "London", latitude: 51.5074, longitude: -0.1276 },
-        // { name: "Washington DC", latitude: 38.9072, longitude: -77.0369 },
-        // { name: "Rome", latitude: 41.9028, longitude: 12.4964 },
+        { name: "London", latitude: 51.5074, longitude: -0.1276 },
+        { name: "Washington DC", latitude: 38.9072, longitude: -77.0369 },
+        { name: "Rome", latitude: 41.9028, longitude: 12.4964 },
       ],
       zoneNumber: "",
       zoneLetter: "",
@@ -142,26 +160,29 @@ export default {
       startCoordinate: null,
       etas: [],
       state: STATES.START_COORDINATE,
+      isShowModal: false,
     };
   },
   mounted() {
     this.drawMap();
     window.addEventListener("resize", this.resizeMap);
     window.addEventListener("keydown", this.handleKeydown);
-    this.$refs.zoneNumberInput.focus();
+    if (this.markers.length > 0) {
+      this.drawMarkers();
+    }
   },
   beforeDestroy() {
     window.removeEventListener("resize", this.resizeMap);
     window.removeEventListener("keydown", this.handleKeydown);
   },
   methods: {
-    
     resizeMap() {
       this.width = window.innerWidth;
       this.height = window.innerHeight;
 
       d3.select("#map").select("svg").remove();
       this.drawMap();
+      this.drawMarkers();
     },
     drawMap() {
       this.projection = geoMercator()
@@ -184,8 +205,6 @@ export default {
           .attr("d", this.path)
           .attr("fill", "#333")
           .attr("stroke", "#ccc");
-
-        this.drawMarkers();
       });
 
       d3.json("src/data/states-topo.json").then((world) => {
@@ -195,23 +214,46 @@ export default {
           .attr("d", this.path)
           .attr("fill", "none")
           .attr("stroke", "#ccc");
+
+        this.drawMarkers();
       });
     },
+    pushMarker($event) {
+      // console.log("pushMarker event", $event);
+      this.markers.push($event);
+      this.drawMarkers();
+      // this.resetInputFields();
+    },
     drawMarkers() {
+      if (!this.svg) return;
+
       this.markers.forEach((marker) => {
-        const [cx, cy] = this.projection([marker.longitude, marker.latitude]);
-        this.svg
-          .append(marker.symbol ?? "triangle")
-          .attr("cx", cx)
-          .attr("cy", cy)
-          .attr("r", 5)
-          .attr("fill", marker.color ?? "red")
-          .attr("stroke", "black")
-          .attr("stroke-width", 1);
+        const [cx, cy] = this.projection([
+          marker.longitude,
+          marker.latitude,
+          marker.color,
+          marker.symbol,
+        ]);
+        if (this.markers.symbol) {
+          this.svg
+            .appen("polygon")
+            .attr("points", "-37.43,32.41 0,-32.41 37.43,32.41")
+            .attr("fill", marker.color ?? "red")
+            .attr("stroke", "black")
+            .attr("stroke-width", 1);
+        } else
+          this.svg
+            .append("circle")
+            .attr("cx", cx)
+            .attr("cy", cy)
+            .attr("r", 5)
+            .attr("fill", marker.color ?? "red")
+            .attr("stroke", "black")
+            .attr("stroke-width", 1);
       });
     },
     handleStartCoordinate(coordinate) {
-      const { latitude, longitude } = utm.toLatLon(
+      const { latitude, longitude } = toLatLon(
         coordinate.easting,
         coordinate.northing,
         coordinate.zoneNumber,
@@ -229,7 +271,7 @@ export default {
       this.title = "Inserire coordinate bersaglio";
     },
     handleTargetCoordinate(coordinate) {
-      const { latitude, longitude } = utm.toLatLon(
+      const { latitude, longitude } = toLatLon(
         coordinate.easting,
         coordinate.northing,
         coordinate.zoneNumber,
@@ -246,39 +288,26 @@ export default {
         alert("Password errata. Riprova.");
       }
     },
-    handleEnter() {
-      try {
-        const { latitude, longitude } = toLatLon(
-          parseFloat(this.easting),
-          parseFloat(this.northing),
-          parseInt(this.zoneNumber),
-          this.zoneLetter.toUpperCase()
-        );
-        console.log({ latitude, longitude });
-        this.markers.push({ latitude, longitude });
-        this.drawMarkers();
-        this.resetInputFields();
-        this.nthRocket++;
-      } catch (error) {
-        alert(
-          "Errore nella conversione delle coordinate. Verifica i valori inseriti."
-        );
-      }
-    },
     handleKeydown(event) {
-      console.log("current state: ", this.state, event);
+      // console.log("current state: ", this.state, event);
       if (event.ctrlKey && event.key === "s") {
         // console.log(event);
         // this.title = "Inserimento terminato";
         // this.insertingTarget = true;
         this.state = STATES.PASSWORD;
-      } else if (
+      } else if (event.ctrlKey && event.key === "a") {
         //show modal
-        this.state === STATES.TERMINATE_NAVIGATION &&
-        event.ctrlKey &&
-        event.key === "a"
-      ) {
+        this.isShowModal = true;
         this.state = STATES.TERMINATE_NAVIGATION;
+      }
+    },
+    closeModal() {
+      this.isShowModal = false;
+    },
+    changeState(newState) {
+      switch (newState) {
+        case "TERMINATE_NAVIGATION":
+          this.state = STATES.TERMINATE_NAVIGATION;
       }
     },
     calculateEtas() {

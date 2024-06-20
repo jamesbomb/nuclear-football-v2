@@ -61,12 +61,14 @@
           />
         </label>
       </div>
-      <p>Premi invio per confermare</p>
+      <p>Premi Invio per confermare</p>
     </div>
   </div>
 </template>
 
 <script>
+import { toLatLon } from "utm";
+
 export default {
   name: "CoordinateInput",
   props: {
@@ -79,10 +81,23 @@ export default {
       zoneLetter: "",
       easting: null,
       northing: null,
+      title: "",
     };
   },
   mounted() {
     this.$refs.zoneNumberInput.focus();
+    window.addEventListener("keyup", (event) => {
+      if(event.key === "Enter" && this.northing.length === 7) {
+        this.handleEnter();
+      }
+    })
+  },
+  beforeDestroy() {
+    window.removeEventListener("keyup", (event) => {
+      if(event.key === "Enter" && this.northing.length === 7) {
+        this.handleEnter();
+      }
+    });
   },
   methods: {
     handleSubmit() {
@@ -92,19 +107,16 @@ export default {
         easting: this.easting,
         northing: this.northing,
       });
+      // $this.emit('resetInputFields')
       this.resetInputFields();
+      this.$refs.zoneNumberInput.focus();
     },
     resetInputFields() {
       this.zoneNumber = "";
       this.zoneLetter = "";
       this.easting = "";
       this.northing = "";
-      if (this.insertingTarget) {
-        this.title = "Inserire coordinata bersaglio";
-      } else {
-        this.title = "Inserire nuova coordinata bersaglio n. " + this.nthRocket;
-      }
-      this.$refs.zoneNumberInput.focus();
+      this.title = "Inserire nuova coordinata bersaglio";
     },
     validateZoneNumber() {
       if (this.zoneNumber.length === 2) {
@@ -124,7 +136,25 @@ export default {
     validateNorthing() {
       if (this.northing.length === 7) {
         console.log("inserito northing");
-        this.handleEnter();
+        // this.handleEnter();
+      }
+    },
+    handleEnter() {
+      try {
+        const { latitude, longitude } = toLatLon(
+          parseFloat(this.easting),
+          parseFloat(this.northing),
+          parseInt(this.zoneNumber),
+          this.zoneLetter.toUpperCase()
+        );
+        console.log({ latitude, longitude });
+        this.$emit('pushMarker', { latitude, longitude, color: "green", symbol: "polygon" })
+        this.resetInputFields();
+      } catch (error) {
+        console.error(error);
+        alert(
+          "Errore nella conversione delle coordinate. Verifica i valori inseriti."
+        );
       }
     },
     handleBackspace(event, field) {
