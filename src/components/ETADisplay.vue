@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h2>ETA per gli obiettivi</h2>
+    <h2>ETA</h2>
     <ul>
       <li
         v-for="eta in etas"
@@ -8,6 +8,7 @@
       >
         {{ eta.label }}: {{ eta.time }} minuti
       </li>
+      <p>Premere CTRL+A per disarmare le testate</p>
     </ul>
   </div>
 </template>
@@ -23,12 +24,14 @@ export default {
 
 <style scoped>
 div {
+  font-family: "Courier New", Courier, monospace;
+  background-color: rgba(255, 255, 255, 0.07);
   position: absolute;
   right: 0;
   top: 0;
-  background-color: white;
   padding: 20px;
   border-radius: 5px;
+  color: white;
 }
 ul {
   list-style: none;
@@ -36,5 +39,8 @@ ul {
 }
 li {
   margin: 5px 0;
+}
+.p {
+  color: white;
 }
 </style>

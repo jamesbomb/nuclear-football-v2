@@ -10,9 +10,7 @@
         :title="title"
         @submit="handleStartCoordinate"
         @pushMarker="pushMarker($event)"
-        @changeState="changeState"
       />
-      <!-- @resetInputFields="resetInputFields" -->
     </div>
     <div
       v-if="state === STATES.TARGET_COORDINATES"
@@ -24,7 +22,6 @@
         ciaos
         @submit="handleTargetCoordinate"
         @pushMarker="pushMarker($event)"
-        @changeState="changeState"
       />
     </div>
     <div
@@ -58,7 +55,7 @@ const STATES = {
   TARGET_COORDINATES: "TARGET_COORDINATES",
   PASSWORD: "PASSWORD",
   ETA_DISPLAY: "ETA_DISPLAY",
-  TERMINATE_NAVIGATION: "TERMINATE_NAVIGATION",
+  // TERMINATE_NAVIGATION: "TERMINATE_NAVIGATION",
 };
 
 export default {
@@ -92,7 +89,6 @@ export default {
       insertingTarget: false,
       nthRocket: 1,
       startCoordinate: { latitude: 51.5074, longitude: -0.1276 },
-      startCoordinate: null,
       etas: [],
       state: STATES.TARGET_COORDINATES,
       isShowModal: false,
@@ -107,6 +103,7 @@ export default {
   beforeDestroy() {
     window.removeEventListener("resize", this.resizeMap);
     window.removeEventListener("keydown", this.handleKeydown);
+    this.drawMarkers();
   },
   methods: {
     resizeMap() {
@@ -136,8 +133,8 @@ export default {
           .append("path")
           .datum(topojson.feature(world, world.objects.countries))
           .attr("d", this.path)
-          .attr("fill", "#333")
-          .attr("stroke", "#ccc");
+          .attr("fill", "#111")
+          .attr("stroke", "lightblue");
       });
 
       d3.json("src/data/states-topo.json").then((world) => {
@@ -146,10 +143,9 @@ export default {
           .datum(topojson.mesh(world, world.objects.states, (a, b) => a !== b))
           .attr("d", this.path)
           .attr("fill", "none")
-          .attr("stroke", "#ccc");
-
-        this.drawMarkers();
-      });
+          .attr("stroke", "lightblue");
+          this.drawMarkers();
+        });
     },
     pushMarker($event) {
       // console.log("pushMarker event", $event);
@@ -171,8 +167,8 @@ export default {
             .attr("class", "marker")
             .attr("cx", cx)
             .attr("cy", cy)
-            .attr("r", 10)
-            .attr("fill", "green")
+            .attr("r", 3)
+            .attr("fill", "lightgreen")
             .attr("stroke", "black")
             .attr("stroke-width", 1);
         } else {
@@ -181,9 +177,11 @@ export default {
             // .append("polygon")
             .append("circle")
             .attr("class", "marker")
+            .attr("cx", cx)
+            .attr("cy", cy)
             // .attr("points", "-5,10 0,-10 5,10")
             // .attr("transform", `translate(${cx},${cy})`)
-            .attr("r", 10)
+            .attr("r", 3)
             .attr("fill", "red")
             .attr("stroke", "black")
             .attr("stroke-width", 1);
@@ -219,32 +217,17 @@ export default {
       this.drawMarkers();
     },
     handlePasswordSubmit(password) {
-      if (password === "correct_password") {
+      if (password === "vivalafiga") {
         this.calculateEtas();
         this.state = STATES.ETA_DISPLAY;
       } else {
         alert("Password errata. Riprova.");
       }
     },
-    handleKeydown(event) {
-      if (event.ctrlKey && event.key === "s") {
-        this.state = STATES.PASSWORD;
-      } else if (event.ctrlKey && event.key === "a") {
-        this.isShowModal = true;
-        this.state = STATES.TERMINATE_NAVIGATION;
-      }
-    },
-    closeModal() {
-      this.isShowModal = false;
-    },
-    changeState(newState) {
-      if (newState === "TERMINATE_NAVIGATION") {
-        this.state = STATES.TERMINATE_NAVIGATION;
-      }
-    },
     calculateEtas() {
-      const mach6Speed = 7174; // Velocità in km/h
+      const mach20Speed = 24696; // Velocità in km/h
       const startCoord = this.startCoordinate;
+      // console.log("this.markers.slice(1)", this.markers.slice(1));
       this.etas = this.markers.slice(1).map((marker, index) => {
         const distance = this.calculateDistance(
           startCoord.latitude,
@@ -252,13 +235,24 @@ export default {
           marker.latitude,
           marker.longitude
         );
-        const time = (distance / mach6Speed) * 60; // Tempo in minuti
+        const time = (distance / mach20Speed) * 60; // Tempo in minuti
         return {
           id: index,
-          label: `Obiettivo ${index + 1}`,
+          label: `Missile ${index + 1}`,
           time: time.toFixed(2),
         };
       });
+    },
+    handleKeydown(event) {
+      if (event.ctrlKey && event.key === "s") {
+        this.state = STATES.PASSWORD;
+      } else if (event.ctrlKey && event.key === "a") {
+        this.isShowModal = true;
+        // this.state = STATES.TERMINATE_NAVIGATION;
+      }
+    },
+    closeModal() {
+      this.isShowModal = false;
     },
     calculateDistance(lat1, lon1, lat2, lon2) {
       const R = 6371; // Raggio della Terra in km

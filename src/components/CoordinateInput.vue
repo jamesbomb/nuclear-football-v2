@@ -13,7 +13,7 @@
             ref="zoneNumberInput"
             type="text"
             maxlength="2"
-            placeholder="00"
+            placeholder="__"
             required
           />
         </label>
@@ -27,7 +27,7 @@
             ref="zoneLetterInput"
             type="text"
             maxlength="1"
-            placeholder="T"
+            placeholder="_"
             required
           />
         </label>
@@ -41,7 +41,7 @@
             ref="eastingInput"
             type="text"
             maxlength="6"
-            placeholder="000000"
+            placeholder="______"
             required
           />
         </label>
@@ -56,12 +56,13 @@
             ref="northingInput"
             type="text"
             maxlength="7"
-            placeholder="0000000"
+            placeholder="_______"
             required
           />
         </label>
       </div>
-      <p>Premi Invio per confermare</p>
+      <p>Premere Invio per confermare</p>
+      <p><b>Premere CTRL+S per terminare l'inserimento</b></p>
     </div>
   </div>
 </template>
@@ -77,10 +78,10 @@ export default {
   },
   data() {
     return {
-      zoneNumber: null,
+      zoneNumber: "",
       zoneLetter: "",
-      easting: null,
-      northing: null,
+      easting: "",
+      northing: "",
       title: "",
     };
   },
@@ -104,7 +105,7 @@ export default {
     handleSubmit() {
       this.onSubmit({
         zoneNumber: this.zoneNumber,
-        zoneLetter: this.zoneLetter,
+        zoneLetter: this.zoneLetter.toUpperCase(),
         easting: this.easting,
         northing: this.northing,
       });
@@ -117,7 +118,8 @@ export default {
       this.zoneLetter = "";
       this.easting = "";
       this.northing = "";
-      this.title = "Inserire nuova coordinata bersaglio";
+      this.title = "Inserire coordinata bersaglio";
+      this.$refs.zoneNumberInput.focus();
     },
     validateZoneNumber() {
       if (this.zoneNumber.length === 2) {
@@ -136,7 +138,7 @@ export default {
     },
     validateNorthing() {
       if (this.northing.length === 7) {
-        console.log("inserito northing");
+        // console.log("inserito northing");
         // this.handleEnter();
       }
     },
@@ -148,12 +150,10 @@ export default {
           parseInt(this.zoneNumber),
           this.zoneLetter.toUpperCase()
         );
-        console.log({ latitude, longitude });
+        // console.log({ latitude, longitude });
         this.$emit("pushMarker", {
           latitude,
           longitude,
-          color: "green",
-          symbol: "polygon",
         });
         this.resetInputFields();
       } catch (error) {
@@ -164,9 +164,9 @@ export default {
       }
     },
     handleBackspace(event, field) {
-      console.log(event, field);
+      // console.log(event, field);
       if (event.key === "Backspace" && this[field].length === 0) {
-        console.log("backspace");
+        // console.log("backspace");
         switch (field) {
           case "zoneLetter":
             this.$refs.zoneNumberInput.focus();
@@ -187,17 +187,24 @@ export default {
 <style scoped>
 #text-box {
   position: absolute;
-  bottom: 10px;
+  bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
-  background-color: rgba(255, 255, 255, 0.8);
-  padding: 0 1rem 1rem 1rem;
-  border-radius: 5px;
+  background-color: rgba(255, 255, 255, 0.4);
+  padding: 0 0.5rem 0 0.5rem;
+  border-radius: 15px;
   text-align: center;
-  width: 35rem;
+  width: 30rem;
   display: flex;
   flex-flow: column nowrap;
   align-items: center;
+  height: 10rem;
+  justify-content: center;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+#text-box h2 {
+  margin: 0.5rem 0;
 }
 .flex-container {
   display: flex;
@@ -213,6 +220,7 @@ export default {
   align-items: center;
   gap: 0.2rem;
   min-width: max-content;
+  color: #000;
 }
 .grid-label span {
   min-width: 4rem;
@@ -221,7 +229,7 @@ export default {
   width: 2rlh;
 }
 .zone-letter {
-  width: 1rlh;
+  width: 1.5rlh;
   text-transform: uppercase;
 }
 .easting {
@@ -234,8 +242,10 @@ export default {
   padding: 5px;
   text-align: center;
   font-size: 2rem;
+  margin-bottom: 0.5rem;
 }
 #text-box p {
-  margin-top: 10px;
+  margin: 0;
+  color: white;
 }
 </style>
