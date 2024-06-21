@@ -6,9 +6,9 @@
         v-for="eta in etas"
         :key="eta.id"
       >
-        {{ eta.label }}: {{ eta.time }} minuti
+        {{ eta.label }}: {{ formatTime(eta.time) }}
       </li>
-      <p>Premere CTRL+A per disarmare le testate</p>
+      <p v-if="isCountingDown">Premere CTRL+A per disarmare le testate</p>
     </ul>
   </div>
 </template>
@@ -18,6 +18,20 @@ export default {
   name: "ETADisplay",
   props: {
     etas: Array,
+    isCountingDown: Boolean,
+  },
+  methods: {
+    formatTime(seconds) {
+      if (seconds < 0) {
+        return "Colpito";
+      }
+      const hours = Math.floor(seconds / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${hours.toString().padStart(2, "0")}:${minutes
+        .toString()
+        .padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+    },
   },
 };
 </script>
@@ -40,7 +54,7 @@ ul {
 li {
   margin: 5px 0;
 }
-.p {
+p {
   color: white;
 }
 </style>

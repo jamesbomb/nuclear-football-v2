@@ -19,7 +19,6 @@
       <h2>{{ title }}</h2>
       <CoordinateInput
         :title="title"
-        ciaos
         @submit="handleTargetCoordinate"
         @pushMarker="pushMarker($event)"
       />
@@ -30,16 +29,20 @@
     >
       <PasswordPrompt @submit="handlePasswordSubmit" />
     </div>
-    <div v-if="state === STATES.ETA_DISPLAY">
-      <ETADisplay :etas="etas" />
-    </div>
+    <!-- <div v-if="state === STATES.ETA_DISPLAY"> -->
+    <ETADisplay :etas="etas" :isCountingDown="isCountingDown" />
+    <!-- </div> -->
     <div v-if="isShowModal">
-      <TerminateNavigationModal @closeModal="closeModal" />
+      <TerminateNavigationModal @closeModal="closeModal" @abort="handleAbort" />
     </div>
+    <!-- <div v-if="showAbort">
+      <TerminateLaunch />
+    </div> -->
   </div>
 </template>
 
 <script>
+import { exec } from 'child_process';
 import * as d3 from "d3";
 import { geoPath, geoMercator } from "d3-geo";
 import * as topojson from "topojson-client";
@@ -49,6 +52,7 @@ import CoordinateInput from "./components/CoordinateInput.vue";
 import PasswordPrompt from "./components/PasswordPrompt.vue";
 import ETADisplay from "./components/ETADisplay.vue";
 import TerminateNavigationModal from "./components/TerminateNavigationModal.vue";
+import TerminateLaunch from "./components/TerminateLaunch.vue";
 
 const STATES = {
   // START_COORDINATE: "START_COORDINATE",
@@ -66,6 +70,7 @@ export default {
     PasswordPrompt,
     ETADisplay,
     TerminateNavigationModal,
+    TerminateLaunch
   },
   data() {
     return {
@@ -92,6 +97,9 @@ export default {
       etas: [],
       state: STATES.TARGET_COORDINATES,
       isShowModal: false,
+      countdownInterval: null,
+      showAbort: false,
+      isCountingDown: false,
     };
   },
   mounted() {
@@ -104,12 +112,14 @@ export default {
     window.removeEventListener("resize", this.resizeMap);
     window.removeEventListener("keydown", this.handleKeydown);
     this.drawMarkers();
+    if (this.countdownInterval) {
+      clearInterval(this.countdownInterval);
+    }
   },
   methods: {
     resizeMap() {
       this.width = window.innerWidth;
       this.height = window.innerHeight;
-
       d3.select("#map").select("svg").remove();
       this.drawMap();
       this.drawMarkers();
@@ -126,7 +136,7 @@ export default {
         .append("svg")
         .attr("width", this.width)
         .attr("height", this.height)
-        .style("background-color", "#000"); // Set background color to black
+        .style("background-color", "#000");
 
       d3.json("src/data/countries-topo.json").then((world) => {
         this.svg
@@ -144,14 +154,15 @@ export default {
           .attr("d", this.path)
           .attr("fill", "none")
           .attr("stroke", "lightblue");
-          this.drawMarkers();
-        });
+        this.drawMarkers();
+      });
     },
     pushMarker($event) {
       // console.log("pushMarker event", $event);
       this.markers.push($event);
       this.drawMarkers();
       // this.resetInputFields();
+      this.calculateEtas();
     },
     drawMarkers() {
       if (!this.svg) return;
@@ -215,11 +226,14 @@ export default {
       );
       this.markers.push({ latitude, longitude });
       this.drawMarkers();
+      this.calculateEtas();
     },
     handlePasswordSubmit(password) {
       if (password === "vivalafiga") {
+        this.startCountdown();
         this.calculateEtas();
         this.state = STATES.ETA_DISPLAY;
+        this.showAbort = true;
       } else {
         alert("Password errata. Riprova.");
       }
@@ -227,7 +241,6 @@ export default {
     calculateEtas() {
       const mach20Speed = 24696; // Velocità in km/h
       const startCoord = this.startCoordinate;
-      // console.log("this.markers.slice(1)", this.markers.slice(1));
       this.etas = this.markers.slice(1).map((marker, index) => {
         const distance = this.calculateDistance(
           startCoord.latitude,
@@ -235,13 +248,35 @@ export default {
           marker.latitude,
           marker.longitude
         );
-        const time = (distance / mach20Speed) * 60; // Tempo in minuti
+        const time = (distance / mach20Speed) * 3600; // Time in seconds
         return {
           id: index,
           label: `Missile ${index + 1}`,
-          time: time.toFixed(2),
+          // time: time.toFixed(2),
+          time: Math.floor(time),
+          // originalTime: time, // Save the original time for resetting
         };
       });
+    },
+    startCountdown() {
+      this.isCountingDown = true;
+      if (this.countdownInterval) {
+        clearInterval(this.countdownInterval);
+      }
+      this.countdownInterval = setInterval(() => {
+        this.etas = this.etas.map((eta) => {
+          if (eta.time > 0) {
+            eta.time--;
+          } else if (eta.time === 0) {
+            // eta.label = `Missile ${eta.id + 1}: Colpito`;
+            eta.time = -1; // To avoid further counting
+          }
+          return eta;
+        });
+        if (this.etas.every((eta) => eta.time < 0)) {
+          clearInterval(this.countdownInterval);
+        }
+      }, 1000);
     },
     handleKeydown(event) {
       if (event.ctrlKey && event.key === "s") {
@@ -252,6 +287,16 @@ export default {
       }
     },
     closeModal() {
+      this.isShowModal = false;
+    },
+    handleAbort() {
+      clearInterval(this.countdownInterval);
+      this.etas.forEach((eta) => {
+        if (eta.time >= 0) {
+          eta.label = `Missile ${eta.id + 1}: Disarmato`;
+        }
+      });
+      this.isCountingDown = false;
       this.isShowModal = false;
     },
     calculateDistance(lat1, lon1, lat2, lon2) {
