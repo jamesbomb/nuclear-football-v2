@@ -1,4 +1,5 @@
-const { app, BrowserWindow, protocol } = require("electron");
+const { app, BrowserWindow, protocol, ipcMain } = require("electron");
+// const { exec } = require("child_process");
 const path = require("node:path");
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -46,6 +47,20 @@ app.whenReady().then(() => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
     }
+  });
+  // Handle shutdown IPC message
+  ipcMain.on("shutdown", (event) => {
+    exec("sudo /sbin/shutdown -h +1", (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Error shutting down: ${error.message}`);
+        return;
+      }
+      if (stderr) {
+        console.error(`Stderr: ${stderr}`);
+        return;
+      }
+      console.log(`Shutdown stdout: ${stdout}`);
+    });
   });
 });
 

@@ -42,7 +42,7 @@
 </template>
 
 <script>
-import { exec } from 'child_process';
+// import { exec } from 'child_process';
 import * as d3 from "d3";
 import { geoPath, geoMercator } from "d3-geo";
 import * as topojson from "topojson-client";
@@ -268,13 +268,18 @@ export default {
           if (eta.time > 0) {
             eta.time--;
           } else if (eta.time === 0) {
-            // eta.label = `Missile ${eta.id + 1}: Colpito`;
+            eta.label = `Missile ${eta.id + 1}: Colpito`;
             eta.time = -1; // To avoid further counting
           }
           return eta;
         });
+        // if (this.etas.every((eta) => eta.time < 0)) {
+        //   clearInterval(this.countdownInterval);
+        //   this.shutdownRaspberryPi();
+        // }
         if (this.etas.every((eta) => eta.time < 0)) {
           clearInterval(this.countdownInterval);
+          window.electronAPI.shutdown();
         }
       }, 1000);
     },
@@ -298,7 +303,22 @@ export default {
       });
       this.isCountingDown = false;
       this.isShowModal = false;
+      // this.shutdownRaspberryPi();
+      window.electronAPI.shutdown();
     },
+    // shutdownRaspberryPi() {
+    //   exec('sudo shutdown -h now', (error, stdout, stderr) => {
+    //     if (error) {
+    //       console.error(`Error shutting down: ${error.message}`);
+    //       return;
+    //     }
+    //     if (stderr) {
+    //       console.error(`Stderr: ${stderr}`);
+    //       return;
+    //     }
+    //     console.log(`Shutdown stdout: ${stdout}`);
+    //   });
+    // },
     calculateDistance(lat1, lon1, lat2, lon2) {
       const R = 6371; // Raggio della Terra in km
       const dLat = this.deg2rad(lat2 - lat1);
@@ -319,7 +339,6 @@ export default {
   },
 };
 </script>
-
 <style>
 body,
 html,
