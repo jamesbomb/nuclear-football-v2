@@ -1,5 +1,5 @@
 const { app, BrowserWindow, protocol, ipcMain } = require("electron");
-// const { exec } = require("child_process");
+const { exec } = require("child_process");
 const path = require("node:path");
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.

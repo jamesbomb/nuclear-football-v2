@@ -1,32 +1,15 @@
 <template>
   <div id="map-container">
     <div id="map"></div>
-    <div
-      v-if="state === STATES.START_COORDINATE"
-      id="text-box"
-    >
+    <div v-if="state === STATES.START_COORDINATE" id="text-box">
       <h2>{{ title }}</h2>
-      <CoordinateInput
-        :title="title"
-        @submit="handleStartCoordinate"
-        @pushMarker="pushMarker($event)"
-      />
+      <CoordinateInput :title="title" @submit="handleStartCoordinate" @pushMarker="pushMarker($event)" />
     </div>
-    <div
-      v-if="state === STATES.TARGET_COORDINATES"
-      id="text-box"
-    >
+    <div v-if="state === STATES.TARGET_COORDINATES" id="text-box">
       <h2>{{ title }}</h2>
-      <CoordinateInput
-        :title="title"
-        @submit="handleTargetCoordinate"
-        @pushMarker="pushMarker($event)"
-      />
+      <CoordinateInput :title="title" @submit="handleTargetCoordinate" @pushMarker="pushMarker($event)" />
     </div>
-    <div
-      v-if="state === STATES.PASSWORD"
-      id="text-box"
-    >
+    <div v-if="state === STATES.PASSWORD" id="text-box">
       <PasswordPrompt @submit="handlePasswordSubmit" />
     </div>
     <!-- <div v-if="state === STATES.ETA_DISPLAY"> -->
@@ -36,13 +19,12 @@
       <TerminateNavigationModal @closeModal="closeModal" @abort="handleAbort" />
     </div>
     <!-- <div v-if="showAbort">
-      <TerminateLaunch />
-    </div> -->
+	<TerminateLaunch />
+	</div> -->
   </div>
 </template>
 
 <script>
-// import { exec } from 'child_process';
 import * as d3 from "d3";
 import { geoPath, geoMercator } from "d3-geo";
 import * as topojson from "topojson-client";
@@ -171,51 +153,34 @@ export default {
 
       this.markers.forEach((marker, index) => {
         const [cx, cy] = this.projection([marker.longitude, marker.latitude]);
-        if (index === 0) {
-          // Primo marker: verde e cerchio
-          this.svg
-            .append("circle")
-            .attr("class", "marker")
-            .attr("cx", cx)
-            .attr("cy", cy)
-            .attr("r", 3)
-            .attr("fill", "lightgreen")
-            .attr("stroke", "black")
-            .attr("stroke-width", 1);
-        } else {
-          // Marker successivi: rossi
-          this.svg
-            // .append("polygon")
-            .append("circle")
-            .attr("class", "marker")
-            .attr("cx", cx)
-            .attr("cy", cy)
-            // .attr("points", "-5,10 0,-10 5,10")
-            // .attr("transform", `translate(${cx},${cy})`)
-            .attr("r", 3)
-            .attr("fill", "red")
-            .attr("stroke", "black")
-            .attr("stroke-width", 1);
-        }
+        this.svg
+          .append("circle")
+          .attr("class", "marker")
+          .attr("cx", cx)
+          .attr("cy", cy)
+          .attr("r", 3)
+          .attr("fill", index === 0 ? "lightgreen" : "red")
+          .attr("stroke", "black")
+          .attr("stroke-width", 1);
       });
     },
     // handleStartCoordinate(coordinate) {
-    //   const { latitude, longitude } = toLatLon(
-    //     coordinate.easting,
-    //     coordinate.northing,
-    //     coordinate.zoneNumber,
-    //     coordinate.zoneLetter
-    //   );
-    //   this.startCoordinate = { latitude, longitude };
-    //   this.markers.push({
-    //     latitude,
-    //     longitude,
-    //     color: "green",
-    //     symbol: "circle",
-    //   });
-    //   this.drawMarkers();
-    //   this.state = STATES.TARGET_COORDINATES;
-    //   this.title = "Inserire coordinate bersaglio";
+    // const { latitude, longitude } = toLatLon(
+    // coordinate.easting,
+    // coordinate.northing,
+    // coordinate.zoneNumber,
+    // coordinate.zoneLetter
+    // );
+    // this.startCoordinate = { latitude, longitude };
+    // this.markers.push({
+    // latitude,
+    // longitude,
+    // color: "green",
+    // symbol: "circle",
+    // });
+    // this.drawMarkers();
+    // this.state = STATES.TARGET_COORDINATES;
+    // this.title = "Inserire coordinate bersaglio";
     // },
     handleTargetCoordinate(coordinate) {
       const { latitude, longitude } = toLatLon(
@@ -230,16 +195,89 @@ export default {
     },
     handlePasswordSubmit(password) {
       if (password === "vivalafiga") {
-        this.startCountdown();
         this.calculateEtas();
+        this.startMissileAnimation();
+        this.startCountdown();
         this.state = STATES.ETA_DISPLAY;
         this.showAbort = true;
       } else {
         alert("Password errata. Riprova.");
       }
     },
+    startMissileAnimation() {
+      const startCoord = this.startCoordinate;
+      this.markers.slice(1).forEach((marker, index) => {
+        const start = this.projection([startCoord.longitude, startCoord.latitude]);
+        const end = this.projection([marker.longitude, marker.latitude]);
+        const missile = this.svg.append("image")
+          .attr("xlink:href", "src/assets/missile.svg")
+          .attr("width", 48)
+          .attr("height", 48)
+          .attr("x", start[0] - 24) // Center the missile horizontally
+          .attr("y", start[1] - 48); // Position the missile so the bottom is at start[1]
+
+        const eta = this.etas[index].time; // Get the time in seconds
+        const duration = eta * 1000; // Convert seconds to milliseconds
+
+        this.drawTrajectory(start, end);
+        this.animateMissile(missile, start, end, duration);
+      });
+    },
+    drawTrajectory(start, end) {
+      const midX = (start[0] + end[0]) / 2;
+      const peakY = start[1] - 200; // Adjust for desired curve height
+
+      const parabola = d3.line()
+        .x(d => d[0])
+        .y(d => d[1])
+        .curve(d3.curveBasis);
+
+      const points = d3.range(0, 1.01, 0.01).map(t => {
+        const x = start[0] * (1 - t) * (1 - t) + 2 * midX * t * (1 - t) + end[0] * t * t;
+        const y = start[1] * (1 - t) * (1 - t) + 2 * peakY * t * (1 - t) + end[1] * t * t;
+        return [x, y];
+      });
+
+      this.svg.append("path")
+        .attr("d", parabola(points))
+        .attr("fill", "none")
+        .attr("stroke", "yellow")
+        .attr("stroke-width", 2)
+        .attr("stroke-dasharray", "5,5");
+    },
+    animateMissile(missile, start, end, duration) {
+      const midX = (start[0] + end[0]) / 2;
+      const peakY = start[1] - 200; // Adjust for desired curve height
+
+      const missileHeight = 48; // Height of the missile SVG
+      const missileWidth = 48; // Width of the missile SVG
+
+      d3.transition()
+        .duration(duration)
+        .ease(d3.easeLinear)
+        .tween("pathTween", () => {
+          return (t) => {
+            const x = start[0] * (1 - t) * (1 - t) + 2 * midX * t * (1 - t) + end[0] * t * t;
+            const y = start[1] * (1 - t) * (1 - t) + 2 * peakY * t * (1 - t) + end[1] * t * t;
+            const angle = Math.atan2(
+              (start[1] * (1 - (t + 0.01)) * (1 - (t + 0.01)) + 2 * peakY * (t + 0.01) * (1 - (t + 0.01)) + end[1] * (t + 0.01) * (t + 0.01)) - y,
+              (start[0] * (1 - (t + 0.01)) * (1 - (t + 0.01)) + 2 * midX * (t + 0.01) * (1 - (t + 0.01)) + end[0] * (t + 0.01) * (t + 0.01)) - x
+            ) * 180 / Math.PI;
+
+            missile
+              .attr("x", x - missileWidth / 2)
+              .attr("y", y - missileHeight / 2) // Adjust for missile center
+              .attr("transform", `rotate(${angle + 90}, ${x}, ${y})`);
+
+            // Check if the missile tip reached the destination
+            if (t >= 1) {
+              missile.remove();
+            }
+          };
+        });
+    },
     calculateEtas() {
-      const mach20Speed = 24696; // Velocità in km/h
+      const mach20Speed = 124696; // Velocità in km/h
       const startCoord = this.startCoordinate;
       this.etas = this.markers.slice(1).map((marker, index) => {
         const distance = this.calculateDistance(
@@ -274,8 +312,8 @@ export default {
           return eta;
         });
         // if (this.etas.every((eta) => eta.time < 0)) {
-        //   clearInterval(this.countdownInterval);
-        //   this.shutdownRaspberryPi();
+        // clearInterval(this.countdownInterval);
+        // this.shutdownRaspberryPi();
         // }
         if (this.etas.every((eta) => eta.time < 0)) {
           clearInterval(this.countdownInterval);
@@ -303,22 +341,8 @@ export default {
       });
       this.isCountingDown = false;
       this.isShowModal = false;
-      // this.shutdownRaspberryPi();
       window.electronAPI.shutdown();
     },
-    // shutdownRaspberryPi() {
-    //   exec('sudo shutdown -h now', (error, stdout, stderr) => {
-    //     if (error) {
-    //       console.error(`Error shutting down: ${error.message}`);
-    //       return;
-    //     }
-    //     if (stderr) {
-    //       console.error(`Stderr: ${stderr}`);
-    //       return;
-    //     }
-    //     console.log(`Shutdown stdout: ${stdout}`);
-    //   });
-    // },
     calculateDistance(lat1, lon1, lat2, lon2) {
       const R = 6371; // Raggio della Terra in km
       const dLat = this.deg2rad(lat2 - lat1);
@@ -326,9 +350,9 @@ export default {
       const a =
         Math.sin(dLat / 2) * Math.sin(dLat / 2) +
         Math.cos(this.deg2rad(lat1)) *
-          Math.cos(this.deg2rad(lat2)) *
-          Math.sin(dLon / 2) *
-          Math.sin(dLon / 2);
+        Math.cos(this.deg2rad(lat2)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
       const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
       const distance = R * c; // Distanza in km
       return distance;
@@ -351,28 +375,33 @@ html,
   max-width: unset !important;
   padding: 0 !important;
 }
+
 #map-container {
   position: relative;
   width: 100%;
   height: 100%;
   font-size: 16px;
 }
+
 #app {
   overflow: hidden;
   position: absolute;
   left: 0;
   top: 0;
 }
+
 #map {
   background-color: #000;
   position: absolute;
   left: 0;
   top: 0;
 }
+
 svg {
   width: 100%;
   height: 100%;
 }
+
 .modal {
   position: fixed;
   top: 0;
@@ -384,6 +413,7 @@ svg {
   justify-content: center;
   align-items: center;
 }
+
 .modal-content {
   background: white;
   padding: 20px;
