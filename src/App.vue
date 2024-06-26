@@ -277,7 +277,7 @@ export default {
         });
     },
     calculateEtas() {
-      const mach20Speed = 124696; // Velocità in km/h
+      const mach20Speed = 24696; // Velocità in km/h
       const startCoord = this.startCoordinate;
       this.etas = this.markers.slice(1).map((marker, index) => {
         const distance = this.calculateDistance(
