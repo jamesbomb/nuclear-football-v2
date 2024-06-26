@@ -254,7 +254,7 @@ export default {
 
       d3.transition()
         .duration(duration)
-        .ease(d3.easeLinear)
+        .ease(d3.easePolyIn.exponent(1))
         .tween("pathTween", () => {
           return (t) => {
             const x = start[0] * (1 - t) * (1 - t) + 2 * midX * t * (1 - t) + end[0] * t * t;
@@ -305,9 +305,9 @@ export default {
         this.etas = this.etas.map((eta) => {
           if (eta.time > 0) {
             eta.time--;
-          } else if (eta.time === 0) {
+          } else if (eta.time < 0.01) {
             eta.label = `Missile ${eta.id + 1}: Colpito`;
-            eta.time = -1; // To avoid further counting
+            eta.time = 0; // To avoid further counting
           }
           return eta;
         });
