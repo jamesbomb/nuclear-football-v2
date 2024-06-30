@@ -31,14 +31,6 @@
   "author": "dietpi",
   "license": "MIT",
   "dependencies": {
-    "electron-squirrel-startup": "^1.0.1",
-    "@vitejs/plugin-vue": "^5.0.5",
-    "d3": "^7.9.0",
-    "electron-squirrel-startup": "^1.0.1",
-    "topojson": "^3.0.2",
-    "topojson-client": "^3.1.0",
-    "topojson-server": "^3.0.1",
-    "utm": "^1.1.1",
-    "vue": "^3.4.29"
+    "electron-squirrel-startup": "^1.0.1"
   }
 }
