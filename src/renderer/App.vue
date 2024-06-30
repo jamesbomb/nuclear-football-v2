@@ -352,6 +352,7 @@ export default defineComponent({
         // }
         if (this.etas.every((eta) => eta.time < 0)) {
           clearInterval(this.countdownInterval)
+          console.log('shutting down...')
           window.electronAPI.shutdown()
         }
       }, 1000)
