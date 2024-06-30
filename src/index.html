@@ -1,12 +1,17 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8" />
-    <title>Nuclear Football 🏈</title>
+<html lang="en">
 
-  </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/src/renderer.js"></script>
-  </body>
+<head>
+  <meta charset="utf-8">
+  <title><%= htmlWebpackPlugin.options.title %></title>
+</head>
+
+<body>
+<noscript>
+  <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled.
+    Please enable it to continue.</strong>
+</noscript>
+<div id="app"></div>
+</body>
+
 </html>

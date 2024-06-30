@@ -1,45 +1,94 @@
 {
   "name": "nuclear-football",
-  "productName": "nuclear-football",
-  "version": "1.0.0",
-  "description": "My Electron application description",
-  "main": ".webpack/main",
-  "scripts": {
-    "start": "electron-forge start",
-    "package": "electron-forge package",
-    "make": "electron-forge make",
-    "publish": "electron-forge publish",
-    "lint": "echo \"No linting configured\""
-  },
-  "devDependencies": {
-    "@electron-forge/cli": "^7.4.0",
-    "@electron-forge/maker-deb": "^7.4.0",
-    "@electron-forge/maker-rpm": "^7.4.0",
-    "@electron-forge/maker-squirrel": "^7.4.0",
-    "@electron-forge/maker-zip": "^7.4.0",
-    "@electron-forge/plugin-auto-unpack-natives": "^7.4.0",
-    "@electron-forge/plugin-fuses": "^7.4.0",
-    "@electron-forge/plugin-webpack": "^7.4.0",
-    "@electron/fuses": "^1.8.0",
-    "@vercel/webpack-asset-relocator-loader": "1.7.3",
-    "css-loader": "^6.11.0",
-    "electron": "31.1.0",
-    "node-loader": "^2.0.0",
-    "style-loader": "^3.0.0",
-    "vue-loader": "^17.4.2",
-    "vue-template-compiler": "^2.7.16"
-  },
-  "keywords": [],
-  "author": "dietpi",
+  "version": "0.0.1",
+  "description": "Nuclear football simulation for my airsoft team - based on the RubyOn's template",
+  "main": "main.js",
+  "repository": "https://github.com/jamesbomb/nuclear-football-v2.git",
+  "author": "jacopo.bombardieri@gmail.com",
   "license": "MIT",
+  "scripts": {
+    "dev": "node ./config/dev.js",
+    "build": "node ./config/build.js",
+    "clean": "node ./config/clean.js"
+  },
   "dependencies": {
-    "@vitejs/plugin-vue": "^5.0.5",
     "d3": "^7.9.0",
     "electron-squirrel-startup": "^1.0.1",
+    "fsevents": "^2.3.3",
     "topojson": "^3.0.2",
     "topojson-client": "^3.1.0",
     "topojson-server": "^3.0.1",
     "utm": "^1.1.1",
-    "vue": "^3.4.29"
+    "vue": "^3.0.5",
+    "vue-router": "^4.0.3"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.12.10",
+    "@babel/preset-env": "^7.12.11",
+    "@vue/compiler-sfc": "^3.0.5",
+    "babel-eslint": "^10.1.0",
+    "babel-loader": "^8.2.2",
+    "cfonts": "^2.9.1",
+    "chalk": "^4.1.0",
+    "cross-spawn": "^7.0.3",
+    "css-loader": "^5.0.1",
+    "del": "^6.0.0",
+    "electron": "^11.2.1",
+    "electron-builder": "^22.9.1",
+    "electron-devtools-installer": "^3.1.1",
+    "electron-log": "^4.3.1",
+    "eslint": "^7.18.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-config-prettier": "^7.2.0",
+    "eslint-import-resolver-webpack": "^0.13.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-prettier": "^3.3.1",
+    "eslint-plugin-vue": "^7.5.0",
+    "eslint-webpack-plugin": "^2.4.3",
+    "file-loader": "^6.2.0",
+    "html-webpack-plugin": "^5.0.0-beta.6",
+    "prettier": "^2.2.1",
+    "style-loader": "^2.0.0",
+    "vue-eslint-parser": "^7.4.1",
+    "vue-loader": "^16.1.2",
+    "vue-template-compiler": "^2.6.12",
+    "webpack": "^5.18.0",
+    "webpack-dev-server": "^3.11.2",
+    "webpack-merge": "^5.7.3"
+  },
+  "build": {
+    "buildDependenciesFromSource": true,
+    "appId": "com.rubyon.app",
+    "directories": {
+      "output": "build"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "./src/renderer/assets/icons/icon.icns"
+    },
+    "win": {
+      "target": "portable",
+      "icon": "./src/renderer/assets/icons/icon.png"
+    },
+    "mac": {
+      "identity": null,
+      "target": {
+        "target": "dmg",
+        "arch": "arm64"
+      },
+      "icon": "./src/renderer/assets/icons/icon.icns"
+    },
+    "files": [
+      "package.json",
+      {
+        "from": "dist",
+        "filter": [
+          "renderer.js",
+          "main.js",
+          "index.html",
+          "images/*.*"
+        ]
+      }
+    ]
   }
 }
