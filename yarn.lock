@@ -1637,7 +1637,7 @@ cross-zip@^4.0.0:
   resolved "https://registry.npmjs.org/cross-zip/-/cross-zip-4.0.1.tgz"
   integrity sha512-n63i0lZ0rvQ6FXiGQ+/JFCKAUyPFhLQYJIqKaa+tSJtfKeULF/IDNDAbdnSIxgS4NTuw2b0+lj8LzfITuq+ZxQ==
 
-css-loader@^6.0.0:
+css-loader@^6.11.0:
   version "6.11.0"
   resolved "https://registry.npmjs.org/css-loader/-/css-loader-6.11.0.tgz"
   integrity sha512-CTJ+AEQJjq5NzLga5pE39qdiSV56F8ywCIsqNIRF0r7BDgWsN25aazToqAFg7ZrtA/U016xudB3ffgweORxX7g==
@@ -1920,6 +1920,11 @@ d3@^7.9.0:
     d3-timer "3"
     d3-transition "3"
     d3-zoom "3"
+
+de-indent@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.npmjs.org/de-indent/-/de-indent-1.0.2.tgz"
+  integrity sha512-e/1zu3xH5MQryN2zdVaF0OrdNLUbvWxzMbi+iNA6Bky7l1RoP8a2fIbRocyHclXt/arDrrR6lL3TqFD9pMQTsg==
 
 debug@^2.2.0:
   version "2.6.9"
@@ -2876,6 +2881,11 @@ has-unicode@^2.0.1:
   version "2.0.1"
   resolved "https://registry.npmjs.org/has-unicode/-/has-unicode-2.0.1.tgz"
   integrity sha512-8Rf9Y83NBReMnx0gFzA8JImQACstCYWUplepDa9xprwwtmgEZUF0h/i5xSA625zB/I37EtrswSST6OXxwaaIJQ==
+
+hash-sum@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.npmjs.org/hash-sum/-/hash-sum-2.0.0.tgz"
+  integrity sha512-WdZTbAByD+pHfl/g9QSsBIIwy8IT+EsPiKDs0KNX+zSHhdDLFKdZu0BQHljvO+0QI/BasbMSUa8wYNCZTvhslg==
 
 hasown@^2.0.0, hasown@^2.0.2:
   version "2.0.2"
@@ -5210,6 +5220,23 @@ vite@^5.0.0:
   optionalDependencies:
     fsevents "~2.3.3"
 
+vue-loader@^17.4.2:
+  version "17.4.2"
+  resolved "https://registry.npmjs.org/vue-loader/-/vue-loader-17.4.2.tgz"
+  integrity sha512-yTKOA4R/VN4jqjw4y5HrynFL8AK0Z3/Jt7eOJXEitsm0GMRHDBjCfCiuTiLP7OESvsZYo2pATCWhDqxC5ZrM6w==
+  dependencies:
+    chalk "^4.1.0"
+    hash-sum "^2.0.0"
+    watchpack "^2.4.0"
+
+vue-template-compiler@^2.7.16:
+  version "2.7.16"
+  resolved "https://registry.npmjs.org/vue-template-compiler/-/vue-template-compiler-2.7.16.tgz"
+  integrity sha512-AYbUWAJHLGGQM7+cNTELw+KsOG9nl2CnSv467WobS5Cv9uk3wFcnr1Etsz2sEIHEZvw1U+o9mRlEO6QbZvUPGQ==
+  dependencies:
+    de-indent "^1.0.2"
+    he "^1.2.0"
+
 vue@^3.2.25, vue@^3.4.29, vue@3.4.31:
   version "3.4.31"
   resolved "https://registry.npmjs.org/vue/-/vue-3.4.31.tgz"
@@ -5221,7 +5248,7 @@ vue@^3.2.25, vue@^3.4.29, vue@3.4.31:
     "@vue/server-renderer" "3.4.31"
     "@vue/shared" "3.4.31"
 
-watchpack@^2.4.1:
+watchpack@^2.4.0, watchpack@^2.4.1:
   version "2.4.1"
   resolved "https://registry.npmjs.org/watchpack/-/watchpack-2.4.1.tgz"
   integrity sha512-8wrBCMtVhqcXP2Sup1ctSkga6uc2Bx0IIvKyT7yTFier5AXHooSI+QyQQAtTb7+E0IUCCKyTFmXqdqgum2XWGg==
@@ -5309,7 +5336,7 @@ webpack-sources@^3.2.3:
   resolved "https://registry.npmjs.org/webpack-sources/-/webpack-sources-3.2.3.tgz"
   integrity sha512-/DyMEOrDgLKKIG0fmvtz+4dUX/3Ghozwgm6iPp8KRhvn+eQf9+Q7GWxVNMk3+uCPWfdXYC4ExGBckIXdFEfH1w==
 
-"webpack@^4.0.0 || ^5.0.0", "webpack@^4.37.0 || ^5.0.0", webpack@^5.0.0, webpack@^5.1.0, webpack@^5.20.0, webpack@^5.69.1:
+"webpack@^4.0.0 || ^5.0.0", "webpack@^4.1.0 || ^5.0.0-0", "webpack@^4.37.0 || ^5.0.0", webpack@^5.0.0, webpack@^5.1.0, webpack@^5.20.0, webpack@^5.69.1:
   version "5.92.1"
   resolved "https://registry.npmjs.org/webpack/-/webpack-5.92.1.tgz"
   integrity sha512-JECQ7IwJb+7fgUFBlrJzbyu3GEuNBcdqr1LD7IbSzwkSmIevTm8PF+wej3Oxuz/JFBUZ6O1o43zsPkwm1C4TmA==
