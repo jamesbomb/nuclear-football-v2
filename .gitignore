@@ -92,3 +92,5 @@ typings/
 out/
 
 /dist/
+extra/nf/node_modules/
+extra/nf/dist/
