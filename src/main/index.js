@@ -1,5 +1,5 @@
 import { app, BrowserWindow, ipcMain } from 'electron'
-const { exec } = require('child_process')
+// const { exec } = require('child_process')
 const path = require('path')
 
 async function createWindow() {
@@ -10,7 +10,7 @@ async function createWindow() {
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,
-      enableRemoteModule: true,
+      enableRemoteModule: false,
       contextIsolation: false
     },
     fullscreen: true
@@ -38,18 +38,20 @@ app.on('window-all-closed', () => {
 app.on('ready', createWindow)
 
 // eslint-disable-next-line no-unused-vars
-ipcMain.on('shutdown', (event) => {
+ipcMain.on('close-app', (event) => {
+  console.log('App will close in 10 seconds...')
   setTimeout(() => {
-    exec('sudo shutdown -h now', (error, stdout, stderr) => {
-      if (error) {
-        console.error(`Error shutting down: ${error.message}`)
-        return
-      }
-      if (stderr) {
-        console.error(`Stderr: ${stderr}`)
-        return
-      }
-      console.log(`Shutdown stdout: ${stdout}`)
-    })
-  }, 60000) // 1 minute delay
+    app.quit()
+    // exec('sudo shutdown -h now', (error, stdout, stderr) => {
+    // if (error) {
+    // console.error(`Error shutting down: ${error.message}`)
+    // return
+    // }
+    // if (stderr) {
+    // console.error(`Stderr: ${stderr}`)
+    // return
+    // }
+    // console.log(`Shutdown stdout: ${stdout}`)
+    // })
+  }, 10000)
 })
