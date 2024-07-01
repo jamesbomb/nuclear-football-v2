@@ -94,7 +94,8 @@ export default defineComponent({
       keyHandling: {
         ctrlSHandled: false,
         ctrlAHandled: false
-      }
+      },
+      missileRefs: []
     }
   },
   mounted() {
@@ -238,6 +239,8 @@ export default defineComponent({
           .attr('height', 48)
           .attr('x', start[0] - 24) // Center the missile horizontally
           .attr('y', start[1] - 48) // Position the missile so the bottom is at start[1]
+
+        this.missileRefs.push(missile)
 
         const eta = this.etas[index].time // Get the time in seconds
         const duration = eta * 1000 // Convert seconds to milliseconds
@@ -433,6 +436,11 @@ export default defineComponent({
       })
       this.isCountingDown = false
       this.isShowModal = false
+
+      // Remove all missiles
+      this.missileRefs.forEach((missile) => missile.remove())
+      this.missileRefs = []
+
       // window.electronAPI.shutdown()
       console.log('App will close in 10 seconds...')
       this.scheduleShutdown()
