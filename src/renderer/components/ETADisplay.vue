@@ -2,43 +2,43 @@
   <div>
     <h2>ETA</h2>
     <ul>
-      <li
-        v-for="eta in etas"
-        :key="eta.id"
-      >
-        {{ eta.label }}: {{ formatTime(eta.time) }}
+      <li v-for="eta in etas" :key="eta.id">
+        <template v-if="eta.time > 0.01">
+          {{ eta.label }}: {{ formatTime(eta.time) }}
+        </template>
+        <template v-else> {{ eta.label }} </template>
       </li>
-      <p v-if="isCountingDown">Premere CTRL+A per disarmare le testate</p>
+      <p v-if="isCountingDown">Premere CTRL+A per disarmare <br />le testate</p>
     </ul>
   </div>
 </template>
 
 <script>
 export default {
-  name: "ETADisplay",
+  name: 'ETADisplay',
   props: {
     etas: Array,
-    isCountingDown: Boolean,
+    isCountingDown: Boolean
   },
   methods: {
     formatTime(seconds) {
       // if (seconds < 0) {
-      //   return "Colpito";
+      // return "Colpito";
       // }
-      const hours = Math.floor(seconds / 3600);
-      const minutes = Math.floor((seconds % 3600) / 60);
-      const secs = Math.floor(seconds % 60);
-      return `${hours.toString().padStart(2, "0")}:${minutes
+      const hours = Math.floor(seconds / 3600)
+      const minutes = Math.floor((seconds % 3600) / 60)
+      const secs = Math.floor(seconds % 60)
+      return `${hours.toString().padStart(2, '0')}:${minutes
         .toString()
-        .padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
-    },
-  },
-};
+        .padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+    }
+  }
+}
 </script>
 
 <style scoped>
 div {
-  font-family: "Courier New", Courier, monospace;
+  font-family: 'Courier New', Courier, monospace;
   background-color: rgba(255, 255, 255, 0.07);
   position: absolute;
   right: 0;

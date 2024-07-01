@@ -172,6 +172,7 @@ export default defineComponent({
         this.svg
           .append('circle')
           .attr('class', 'marker')
+          .attr('id', `marker-${index}`)
           .attr('cx', cx)
           .attr('cy', cy)
           .attr('r', 3)
@@ -284,7 +285,7 @@ export default defineComponent({
       missile
         .transition()
         .duration(duration)
-        .ease(d3.easePolyIn.exponent(1))
+        .ease(d3.easeLinear)
         .tween(`pathTween-${index}`, () => {
           return (t) => {
             const x =
@@ -318,12 +319,40 @@ export default defineComponent({
             if (t >= 1) {
               missile.remove()
               this.etas[index].label = `Missile ${index + 1}: Colpito`
+
+              const marker = this.svg.select(`#marker-${index}`)
+              if (marker) {
+                marker.remove()
+              }
+              this.svg
+                .append('line')
+                .attr('x1', end[0] - 5)
+                .attr('y1', end[1] - 5)
+                .attr('x2', end[0] + 5)
+                .attr('y2', end[1] + 5)
+                .attr('stroke', 'red')
+                .attr('stroke-width', 2)
+                .attr('id', `marker-cross-${index}`)
+              this.svg
+                .append('line')
+                .attr('x1', end[0] - 5)
+                .attr('y1', end[1] + 5)
+                .attr('x2', end[0] + 5)
+                .attr('y2', end[1] - 5)
+                .attr('stroke', 'red')
+                .attr('stroke-width', 2)
+                .attr('id', `marker-cross-${index}`)
             }
+          }
+        })
+        .on('end', () => {
+          if (this.etas.every((eta) => eta.time <= 0)) {
+            this.scheduleShutdown()
           }
         })
     },
     calculateEtas() {
-      const mach20Speed = 24696 // Velocità in km/h
+      const mach20Speed = 24696 / 3600 // Velocità in km/s
       const startCoord = this.startCoordinate
       this.etas = this.markers.slice(1).map((marker, index) => {
         const distance = this.calculateDistance(
@@ -332,7 +361,7 @@ export default defineComponent({
           marker.latitude,
           marker.longitude
         )
-        const time = (distance / mach20Speed) * 3600 // Time in seconds
+        const time = distance / mach20Speed // Time in seconds
         return {
           id: index,
           label: `Missile ${index + 1}`,
@@ -361,10 +390,11 @@ export default defineComponent({
         // clearInterval(this.countdownInterval);
         // this.shutdownRaspberryPi();
         // }
-        if (this.etas.every((eta) => eta.time < 0)) {
+        if (this.etas.every((eta) => eta.time <= 0)) {
           clearInterval(this.countdownInterval)
           console.log('shutting down...')
-          window.electronAPI.shutdown()
+          // window.electronAPI.shutdown()
+          this.scheduleShutdown()
         }
       }, 1000)
     },
@@ -404,7 +434,8 @@ export default defineComponent({
       })
       this.isCountingDown = false
       this.isShowModal = false
-      window.electronAPI.shutdown()
+      // window.electronAPI.shutdown()
+      this.scheduleShutdown()
     },
     calculateDistance(lat1, lon1, lat2, lon2) {
       const R = 6371 // Raggio della Terra in km
@@ -422,6 +453,10 @@ export default defineComponent({
     },
     deg2rad(deg) {
       return deg * (Math.PI / 180)
+    },
+    scheduleShutdown() {
+      console.log('Scheduling shutdown...')
+      window.electronAPI.shutdown()
     }
   }
 })
