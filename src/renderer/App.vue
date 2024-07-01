@@ -356,6 +356,7 @@ export default defineComponent({
     calculateEtas() {
       const mach20Speed = 24696 / 3600 // Velocità in km/s
       const startCoord = this.startCoordinate
+      const minimumTime = 240
       this.etas = this.markers.slice(1).map((marker, index) => {
         const distance = this.calculateDistance(
           startCoord.latitude,
@@ -363,7 +364,10 @@ export default defineComponent({
           marker.latitude,
           marker.longitude
         )
-        const time = distance / mach20Speed // Time in seconds
+        let time = distance / mach20Speed // Time in seconds
+        if (time < minimumTime) {
+          time += minimumTime
+        }
         return {
           id: index,
           label: `Missile ${index + 1}`,
@@ -486,6 +490,7 @@ html,
   margin: 0 !important;
   max-width: unset !important;
   padding: 0 !important;
+  cursor: none;
 }
 
 #map-container {
