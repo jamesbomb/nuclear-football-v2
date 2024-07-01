@@ -90,19 +90,25 @@ export default defineComponent({
       isShowModal: false,
       countdownInterval: null,
       showAbort: false,
-      isCountingDown: false
+      isCountingDown: false,
+      keyHandling: {
+        ctrlSHandled: false,
+        ctrlAHandled: false
+      }
     }
   },
   mounted() {
     this.drawMap()
     window.addEventListener('resize', this.resizeMap)
     window.addEventListener('keydown', this.handleKeydown)
+    window.addEventListener('keyup', this.handleKeyup)
     this.drawMarkers()
   },
   // eslint-disable-next-line vue/no-deprecated-destroyed-lifecycle
   beforeDestroy() {
     window.removeEventListener('resize', this.resizeMap)
     window.removeEventListener('keydown', this.handleKeydown)
+    window.removeEventListener('keyup', this.handleKeyup)
     this.drawMarkers()
     if (this.countdownInterval) {
       clearInterval(this.countdownInterval)
@@ -211,6 +217,7 @@ export default defineComponent({
         this.state = STATES.ETA_DISPLAY
         this.showAbort = true
       } else {
+        // eslint-disable-next-line no-alert
         alert('Password errata. Riprova.')
       }
     },
@@ -224,6 +231,7 @@ export default defineComponent({
         const end = this.projection([marker.longitude, marker.latitude])
         const missile = this.svg
           .append('image')
+          .attr('id', `missile-${index}`)
           .attr('xlink:href', 'src/assets/missile.svg')
           .attr('width', 48)
           .attr('height', 48)
@@ -232,12 +240,12 @@ export default defineComponent({
 
         const eta = this.etas[index].time // Get the time in seconds
         const duration = eta * 1000 // Convert seconds to milliseconds
-
-        this.drawTrajectory(start, end)
-        this.animateMissile(missile, start, end, duration)
+        console.log(missile, index)
+        this.drawTrajectory(start, end, `trajectory-${index}`)
+        this.animateMissile(missile, start, end, duration, index)
       })
     },
-    drawTrajectory(start, end) {
+    drawTrajectory(start, end, trajectoryId) {
       const midX = (start[0] + end[0]) / 2
       const peakY = start[1] - 200 // Adjust for desired curve height
 
@@ -259,23 +267,25 @@ export default defineComponent({
 
       this.svg
         .append('path')
+        .attr('id', trajectoryId)
         .attr('d', parabola(points))
         .attr('fill', 'none')
         .attr('stroke', 'yellow')
         .attr('stroke-width', 2)
         .attr('stroke-dasharray', '5,5')
     },
-    animateMissile(missile, start, end, duration) {
+    animateMissile(missile, start, end, duration, index) {
       const midX = (start[0] + end[0]) / 2
       const peakY = start[1] - 200 // Adjust for desired curve height
 
       const missileHeight = 48 // Height of the missile SVG
       const missileWidth = 48 // Width of the missile SVG
 
-      d3.transition()
+      missile
+        .transition()
         .duration(duration)
         .ease(d3.easePolyIn.exponent(1))
-        .tween('pathTween', () => {
+        .tween(`pathTween-${index}`, () => {
           return (t) => {
             const x =
               start[0] * (1 - t) * (1 - t) +
@@ -307,6 +317,7 @@ export default defineComponent({
             // Check if the missile tip reached the destination
             if (t >= 1) {
               missile.remove()
+              this.etas[index].label = `Missile ${index + 1}: Colpito`
             }
           }
         })
@@ -359,10 +370,26 @@ export default defineComponent({
     },
     handleKeydown(event) {
       if (event.ctrlKey && event.key === 's') {
-        this.state = STATES.PASSWORD
+        if (!this.keyHandling.ctrlSHandled) {
+          this.state = STATES.PASSWORD
+          this.keyHandling.ctrlSHandled = true
+        }
       } else if (event.ctrlKey && event.key === 'a') {
-        this.isShowModal = true
+        if (!this.keyHandling.ctrlAHandled) {
+          this.isShowModal = true
+          this.keyHandling.ctrlAHandled = true
+        }
         // this.state = STATES.TERMINATE_NAVIGATION;
+      } else {
+        this.keyHandling.ctrlSHandled = false
+        this.keyHandling.ctrlAHandled = false
+      }
+    },
+    handleKeyup(event) {
+      if (event.key === 'Control') {
+        // Reset both flags when the control key is released
+        this.keyHandling.ctrlSHandled = false
+        this.keyHandling.ctrlAHandled = false
       }
     },
     closeModal() {
