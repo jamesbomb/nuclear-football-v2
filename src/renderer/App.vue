@@ -241,7 +241,6 @@ export default defineComponent({
 
         const eta = this.etas[index].time // Get the time in seconds
         const duration = eta * 1000 // Convert seconds to milliseconds
-        console.log(missile, index)
         this.drawTrajectory(start, end, `trajectory-${index}`)
         this.animateMissile(missile, start, end, duration, index)
       })
@@ -435,6 +434,7 @@ export default defineComponent({
       this.isCountingDown = false
       this.isShowModal = false
       // window.electronAPI.shutdown()
+      console.log('App will close in 10 seconds...')
       this.scheduleShutdown()
     },
     calculateDistance(lat1, lon1, lat2, lon2) {
@@ -456,7 +456,13 @@ export default defineComponent({
     },
     scheduleShutdown() {
       console.log('Scheduling shutdown...')
-      window.electronAPI.shutdown()
+      console.log('App will close in 10 seconds...')
+      setTimeout(() => {
+        // eslint-disable-next-line no-shadow
+        const { remote } = require('electron')
+        const { app } = remote
+        app.quit()
+      }, 10000)
     }
   }
 })
