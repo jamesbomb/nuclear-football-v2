@@ -1,5 +1,5 @@
 <template>
-  <div class="passwordPrompt pulsing-box-shadow ">
+  <div class="passwordPrompt pulsing-box-shadow">
     <h2>Inserire il codice di lancio</h2>
     <input
       v-model="password"
@@ -14,21 +14,21 @@
 
 <script>
 export default {
-  name: "PasswordPrompt",
+  name: 'PasswordPrompt',
   data() {
     return {
-      password: "",
-    };
+      password: ''
+    }
   },
   mounted() {
-    this.$refs.launchCode.focus();
+    this.$refs.launchCode.focus()
   },
   methods: {
     handleSubmit() {
-      this.$emit("submit", this.password);
-    },
-  },
-};
+      this.$emit('submit', this.password)
+    }
+  }
+}
 </script>
 
 <style scoped>
@@ -49,7 +49,7 @@ export default {
   align-items: center;
   height: 10rem;
   justify-content: center;
-  font-family: "Courier New", Courier, monospace;
+  font-family: 'Courier New', Courier, monospace;
   padding-top: 0.1rem;
 }
 h2 {

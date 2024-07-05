@@ -2,7 +2,7 @@ const { name } = require('../package.json')
 
 module.exports = {
   appName: name,
-  wdsPort: 8080,
+  wdsPort: 8085,
 
   // source map
   devSourceMap: 'source-map',

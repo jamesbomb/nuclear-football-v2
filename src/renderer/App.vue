@@ -20,11 +20,14 @@
     <div v-if="state === STATES.PASSWORD" id="text-box">
       <PasswordPrompt @submit="handlePasswordSubmit" />
     </div>
-    <!-- <div v-if="state === STATES.ETA_DISPLAY"> -->
     <ETADisplay :etas="etas" :isCountingDown="isCountingDown" />
-    <!-- </div> -->
     <div v-if="isShowModal">
-      <TerminateNavigationModal @closeModal="closeModal" @abort="handleAbort" />
+      <TerminateNavigationModal
+        v-if="isShowModal"
+        @closeModal="closeModal"
+        @abort="handleAbort"
+        :showDeactivationMessage="showDeactivationModal"
+      />
     </div>
     <!-- <div v-if="showAbort">
 	<TerminateLaunch />
@@ -90,6 +93,7 @@ export default defineComponent({
       isShowModal: false,
       countdownInterval: null,
       showAbort: false,
+      showDeactivationModal: false,
       isCountingDown: false,
       keyHandling: {
         ctrlSHandled: false,
@@ -212,7 +216,7 @@ export default defineComponent({
       this.calculateEtas()
     },
     handlePasswordSubmit(password) {
-      if (password === 'vivalafiga') {
+      if (password === 'A7f2G6$r!46D@23<j81#?') {
         this.calculateEtas()
         this.startMissileAnimation()
         this.startCountdown()
@@ -439,7 +443,8 @@ export default defineComponent({
         }
       })
       this.isCountingDown = false
-      this.isShowModal = false
+      // this.isShowModal = false
+      this.showDeactivationModal = true
 
       // Remove all missiles
       this.missileRefs.forEach((missile) => missile.remove())
