@@ -1,7 +1,7 @@
 <template>
   <div class="modalTermination" @keydown="handleKeyPress" tabindex="0">
     <div class="modal-content pulsing-box-shadow">
-      <h2 v-if="showDeactivationMessage">TESTATE DISATTIVATE</h2>
+      <h2 v-if="showDeactivationMessage">Testate disattivate</h2>
       <h2 v-else>Disarmare le testate?</h2>
       <p v-if="!showDeactivationMessage">Premere S/N</p>
     </div>
@@ -14,10 +14,7 @@ export default {
   data: () => {},
   props: {
     props: {
-      showDeactivationMessage: {
-        type: Boolean,
-        default: false
-      }
+      showDeactivationMessage: Boolean
     }
   },
   mounted() {
@@ -26,7 +23,8 @@ export default {
   methods: {
     handleKeyPress(event) {
       if (event.key === 's' || event.key === 'S') {
-        this.$emit('closeModal')
+        // this.$emit('closeModal')
+        this.showDeactivationMessage = true
         this.$emit('abort')
       } else if (event.key === 'n' || event.key === 'N') {
         this.$emit('closeModal')

@@ -443,14 +443,12 @@ export default defineComponent({
         }
       })
       this.isCountingDown = false
-      // this.isShowModal = false
-      this.showDeactivationModal = true
+      this.showDeactivationModal = true // Keep the deactivation message visible.
 
       // Remove all missiles
       this.missileRefs.forEach((missile) => missile.remove())
       this.missileRefs = []
 
-      // window.electronAPI.shutdown()
       console.log('App will close in 10 seconds...')
       this.scheduleShutdown()
     },
