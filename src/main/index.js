@@ -23,7 +23,7 @@ async function createWindow() {
   } else {
     // eslint-disable-next-line no-undef
     await mainWindow.loadURL(`http://localhost:${WDS_PORT}`)
-    mainWindow.webContents.openDevTools({ mode: 'right' })
+    // mainWindow.webContents.openDevTools({ mode: 'right' })
   }
   mainWindow.show()
 }
