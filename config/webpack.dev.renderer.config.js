@@ -46,6 +46,14 @@ module.exports = merge({
       {
         test: /\.vue$/,
         use: 'vue-loader'
+      },
+      {
+        test: /\.scss$/,
+        use: [
+          'vue-style-loader', // Crea stili all'interno del DOM utilizzando le tag <style>
+          'css-loader', // Traduce CSS in CommonJS
+          'sass-loader' // Compila Sass in CSS, utilizzando Node Sass per default
+        ]
       }
     ]
   },

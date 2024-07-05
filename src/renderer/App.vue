@@ -21,6 +21,8 @@
       <PasswordPrompt @submit="handlePasswordSubmit" />
     </div>
     <ETADisplay :etas="etas" :isCountingDown="isCountingDown" />
+    <!-- <SpeedDisplay :missiles="missileRefs" :isCountingDown="isCountingDown" /> -->
+    <Radar />
     <div v-if="isShowModal">
       <TerminateNavigationModal
         v-if="isShowModal"
@@ -47,6 +49,8 @@ import PasswordPrompt from './components/PasswordPrompt.vue'
 import ETADisplay from './components/ETADisplay.vue'
 import TerminateNavigationModal from './components/TerminateNavigationModal.vue'
 // import TerminateLaunch from './components/TerminateLaunch.vue'
+// import SpeedDisplay from './components/SpeedDisplay.vue'
+import Radar from './components/Radar.vue'
 
 const STATES = {
   // START_COORDINATE: "START_COORDINATE",
@@ -63,7 +67,9 @@ export default defineComponent({
     CoordinateInput,
     PasswordPrompt,
     ETADisplay,
-    TerminateNavigationModal
+    TerminateNavigationModal,
+    // SpeedDisplay
+    Radar
     // TerminateLaunch
   },
   data() {
