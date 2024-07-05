@@ -23,6 +23,7 @@
     <ETADisplay :etas="etas" :isCountingDown="isCountingDown" />
     <!-- <SpeedDisplay :missiles="missileRefs" :isCountingDown="isCountingDown" /> -->
     <Radar />
+    <IPScanner />
     <div v-if="isShowModal">
       <TerminateNavigationModal
         v-if="isShowModal"
@@ -51,6 +52,7 @@ import TerminateNavigationModal from './components/TerminateNavigationModal.vue'
 // import TerminateLaunch from './components/TerminateLaunch.vue'
 // import SpeedDisplay from './components/SpeedDisplay.vue'
 import Radar from './components/Radar.vue'
+import IPScanner from './components/IPScanner.vue'
 
 const STATES = {
   // START_COORDINATE: "START_COORDINATE",
@@ -69,7 +71,8 @@ export default defineComponent({
     ETADisplay,
     TerminateNavigationModal,
     // SpeedDisplay
-    Radar
+    Radar,
+    IPScanner
     // TerminateLaunch
   },
   data() {
