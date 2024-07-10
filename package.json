@@ -4,7 +4,7 @@
   "description": "Nuclear football simulation for my airsoft team - based on the RubyOn's template",
   "main": "main.js",
   "repository": "https://github.com/jamesbomb/nuclear-football-v2.git",
-  "author": "jacopo.bombardieri@gmail.com",
+  "author": "Jacopo Bombardieri <jacopo.bombardieri@gmail.com>",
   "license": "MIT",
   "scripts": {
     "dev": "node ./config/dev.js",
