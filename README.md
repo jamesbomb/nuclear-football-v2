@@ -20,3 +20,5 @@ yarn build
 # Clean
 yarn build:clean
 ```
+# Attention!
+Since this program is intended to run in a custom enclosure running on a battery pack, it integrates a script to shutdown the computer after a bunch of seconds after the completion, __beware to not launch it with sudo permissions__

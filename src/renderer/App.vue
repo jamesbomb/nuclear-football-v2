@@ -225,7 +225,8 @@ export default defineComponent({
       this.calculateEtas()
     },
     handlePasswordSubmit(password) {
-      if (password === 'A7f2G6$r!46D@23<j81#?') {
+      if (password === 'password') {
+        // A7f2G6$r!46D@23<j81#?') {
         this.calculateEtas()
         this.startMissileAnimation()
         this.startCountdown()
