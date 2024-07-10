@@ -8,7 +8,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "node ./config/dev.js",
-    "build": "node ./config/build.js",
+    "build": "electron-builder --armv7l --linux appImage deb",
     "clean": "node ./config/clean.js"
   },
   "dependencies": {

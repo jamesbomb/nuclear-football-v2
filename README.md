@@ -2,6 +2,8 @@
 
 - based on Electron Vue Webpack Boilerplate by RubyOn's template (https://github.com/rubyon/electron-vue-webpack-5)
 
+The password is set to `password`
+
 # Use...
 ```bash
 git clone https://github.com/jamesbomb/nuclear-football-v2.git
@@ -17,7 +19,7 @@ yarn dev
 # Build
 yarn build
 
-# Clean
+# Clean, if you need
 yarn build:clean
 ```
 # Attention!
